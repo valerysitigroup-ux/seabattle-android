@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   server:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Open source bundle
@@ -22,7 +22,7 @@ jobs:
       - run: npm test
         working-directory: SeaBattle/server
   android:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Open source bundle
@@ -32,7 +32,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;34.0.0"
+        run: /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;34.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and verify Android
         run: bash gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
@@ -48,4 +48,5 @@ jobs:
           path: |
             SeaBattle/app/build/reports/
             SeaBattle/app/build/test-results/
+
 
