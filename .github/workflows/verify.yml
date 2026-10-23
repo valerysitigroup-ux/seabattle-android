@@ -93,8 +93,8 @@ jobs:
         if: always()
         run: |
           mkdir -p SeaBattle/app/build/outputs/android-ui
-          adb logcat -d > SeaBattle/app/build/outputs/android-ui/logcat.txt || true
-          adb pull /sdcard/Android/data/com.notebook.seabattle/files/proofs SeaBattle/app/build/outputs/android-ui/ || true
+          # Device evidence is collected inside ci/android-ui.sh before the emulator stops.
+
           cp /tmp/seabattle-ui-server.log SeaBattle/app/build/outputs/android-ui/server.log || true
       - uses: actions/upload-artifact@v4
         if: always()
@@ -104,5 +104,6 @@ jobs:
             SeaBattle/app/build/reports/androidTests/
             SeaBattle/app/build/outputs/androidTest-results/
             SeaBattle/app/build/outputs/android-ui/
+
 
 
