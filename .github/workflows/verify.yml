@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Open source bundle
         run: unzip -q source-bundle.zip -x 'SeaBattle/.github/*'
       - uses: actions/setup-node@v4
@@ -25,6 +27,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Open source bundle
         run: unzip -q source-bundle.zip -x 'SeaBattle/.github/*'
       - uses: actions/setup-java@v4
@@ -48,5 +52,57 @@ jobs:
           path: |
             SeaBattle/app/build/reports/
             SeaBattle/app/build/test-results/
+
+
+  android-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: unzip -q source-bundle.zip -x 'SeaBattle/.github/*'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare local game server
+        run: |
+          cd SeaBattle/server
+          npm ci
+          node index.js > /tmp/seabattle-ui-server.log 2>&1 &
+      - name: Enable emulator acceleration for this runner
+        run: |
+          sudo chown "$(id -u):$(id -g)" /dev/kvm
+          sudo chmod u+rw /dev/kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          ram-size: 2048M
+          disable-animations: false
+          working-directory: SeaBattle
+          script: bash ci/android-ui.sh
+      - name: Collect Android evidence
+        if: always()
+        run: |
+          mkdir -p SeaBattle/app/build/outputs/android-ui
+          adb logcat -d > SeaBattle/app/build/outputs/android-ui/logcat.txt || true
+          adb pull /sdcard/Android/data/com.notebook.seabattle/files/proofs SeaBattle/app/build/outputs/android-ui/ || true
+          cp /tmp/seabattle-ui-server.log SeaBattle/app/build/outputs/android-ui/server.log || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-UI-evidence
+          path: |
+            SeaBattle/app/build/reports/androidTests/
+            SeaBattle/app/build/outputs/androidTest-results/
+            SeaBattle/app/build/outputs/android-ui/
 
 
