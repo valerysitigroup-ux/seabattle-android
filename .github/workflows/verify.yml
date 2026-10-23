@@ -31,7 +31,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;34.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and verify Android
         run: bash gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
@@ -47,3 +48,4 @@ jobs:
           path: |
             SeaBattle/app/build/reports/
             SeaBattle/app/build/test-results/
+
